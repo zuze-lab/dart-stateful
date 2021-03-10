@@ -26,7 +26,7 @@ void main() {
       final s = Stateful('bill');
       final calls = [];
       var subscriber = (String v) => calls.add(v);
-      s.subscribe(subscriber);
+      s.addListener(subscriber);
       expect(calls, hasLength(1));
       expect(calls[0], equals('bill'));
       calls.clear();
@@ -39,7 +39,7 @@ void main() {
       final s = Stateful('bill');
       final calls = [];
       var subscriber = (String v) => calls.add(v);
-      final unsub = s.subscribe(subscriber);
+      final unsub = s.addListener(subscriber);
       calls.clear();
       unsub();
       s.setState(value: 'joe');

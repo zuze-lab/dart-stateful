@@ -1,104 +1,91 @@
 import 'package:stateful/stateful.dart';
 import 'package:test/test.dart';
 
-class Product {
-  final int price;
-  final String description;
-
-  Product({
-    required this.price,
-    required this.description,
-  });
+class Entity {
+  String a = 'a';
+  String b = 'a';
+  String c = 'a';
+  String d = 'a';
+  String e = 'a';
+  String f = 'a';
+  String g = 'a';
+  String h = 'a';
+  String i = 'a';
+  String j = 'a';
+  String k = 'a';
+  String l = 'a';
 }
 
-class Cart {
-  int taxRate;
-  List<Product> products;
-  DateTime? lastViewed;
-
-  Cart({
-    this.taxRate = 15,
-    this.products = const [],
-    this.lastViewed,
-  });
-
-  Cart clone() => Cart()
-    ..taxRate = taxRate
-    ..products = products;
-}
+var A = (Entity e) => e.a;
+var B = (Entity e) => e.b;
+var C = (Entity e) => e.c;
+var D = (Entity e) => e.d;
+var E = (Entity e) => e.e;
+var F = (Entity e) => e.f;
+var G = (Entity e) => e.g;
+var H = (Entity e) => e.h;
+var I = (Entity e) => e.i;
+var J = (Entity e) => e.j;
+var K = (Entity e) => e.k;
+var L = (Entity e) => e.l;
 
 void main() {
   group('Selectors', () {
-    test('it should select0', () {
+    test('it should 0', () {
       final calls = [];
 
-      final s = Stateful(
-        Cart(products: [Product(price: 100, description: 'Chair')]),
+      var selector = Selector1<Entity, String, String>(
+        A,
+        (String v) {
+          calls.add(v);
+          return v;
+        },
       );
 
-      // select the tax rate
-      s.subscribe(
-        Selector0<Cart, int, int>(
-          (cart) => cart.taxRate,
-          (v) {
-            calls.add(v);
-            return v;
-          },
-        ),
-      );
-      expect(calls, isNotEmpty);
+      expect(selector(Entity()), equals('a'));
+      expect(calls.length, equals(1));
+      expect(calls, contains('a'));
       calls.clear();
-      s.setState(
-        patch: (cart) => cart
-          ..products = [
-            ...cart.products,
-            Product(price: 200, description: 'Desk')
-          ],
-      );
-      expect(calls, isEmpty);
-      s.setState(patch: (cart) => cart..taxRate = 10);
-      expect(calls, isNotEmpty);
+      expect(selector(Entity()), equals('a'));
+      expect(calls, isEmpty); // memoized!
+      expect(selector(Entity()..a = 'b'), equals('b'));
+      expect(calls, contains('b'));
     });
 
-    test('it should select1', () {
+    test('it should 2', () {
       final calls = [];
 
-      final s = Stateful(
-        Cart(products: [Product(price: 100, description: 'Chair')]),
+      var selector = Selector2<Entity, String, String, String>(
+        A,
+        B,
+        (String a, String b) {
+          var v = '$a$b';
+          calls.add(v);
+          return v;
+        },
       );
 
-      // create a selector total
-      s.subscribe(
-        Selector1<Cart, List<Product>, int, double>(
-          (cart) => cart.products,
-          (cart) => cart.taxRate,
-          (products, taxRate) {
-            // compute the total
-            var total = products.fold<double>(
-              0,
-              (acc, p) => acc + (p.price * (taxRate / 100)),
-            );
-            calls.add(total);
-            return total;
-          },
+      expect(selector(Entity()), equals('aa'));
+      expect(calls.length, equals(1));
+      expect(calls, contains('aa'));
+      calls.clear();
+      expect(selector(Entity()), equals('aa'));
+      expect(calls, isEmpty); // memoized!
+      expect(selector(Entity()..a = 'b'), equals('ba'));
+      expect(calls, contains('ba'));
+      calls.clear();
+      expect(selector(Entity()..b = 'b'), equals('ab'));
+      expect(calls, contains('ab'));
+      calls.clear();
+      expect(
+        selector(
+          Entity()
+            ..b = 'b' // same as last call
+            ..c = 'b', // different, but not ed
         ),
+        equals('ab'),
       );
-      expect(calls, isNotEmpty);
-      calls.clear();
-      s.setState(
-        patch: (cart) => cart
-          ..products = [
-            ...cart.products,
-            Product(price: 200, description: 'Desk')
-          ],
-      );
-      expect(calls, isNotEmpty);
-      calls.clear();
-      s.setState(patch: (cart) => cart..taxRate = 10);
-      expect(calls, isNotEmpty);
-      calls.clear();
-      s.setState(patch: (cart) => cart..lastViewed = DateTime.now());
-      expect(calls, isEmpty);
+      expect(calls, isEmpty); // memoized!
     });
   });
 }
