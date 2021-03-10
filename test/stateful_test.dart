@@ -25,7 +25,7 @@ void main() {
     test('it should subscribe', () {
       final s = Stateful('bill');
       final calls = [];
-      void subscriber(String v) => calls.add(v);
+      var subscriber = (String v) => calls.add(v);
       s.subscribe(subscriber);
       expect(calls, hasLength(1));
       expect(calls[0], equals('bill'));
@@ -38,7 +38,7 @@ void main() {
     test('it should unsubscribe', () {
       final s = Stateful('bill');
       final calls = [];
-      void subscriber(String v) => calls.add(v);
+      var subscriber = (String v) => calls.add(v);
       final unsub = s.subscribe(subscriber);
       calls.clear();
       unsub();
